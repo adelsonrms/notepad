@@ -1,0 +1,92 @@
+<html lang="pt-BR"><head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Acesso Negado</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&amp;display=swap" rel="stylesheet">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Roboto', sans-serif;
+            background-color: #e0e0e0;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+        }
+        .container h1 {
+            color: #ff4d4d;
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        .container p {
+            font-size: 1rem;
+            color: #333333;
+            margin-bottom: 20px;
+        }
+        textarea {
+            width: 100%;
+            height: 100px;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #cccccc;
+            border-radius: 5px;
+            font-size: 14px;
+            resize: vertical;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 25px;
+            font-size: 16px;
+            color: #ffffff;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+            margin: 5px;
+            transition: background-color 0.3s;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
+        .icon {
+            font-size: 50px;
+            color: #ff4d4d;
+            margin-bottom: 10px;
+        }
+    </style>
+    <script>
+        function enviarJustificativa() {
+            const justificativa = document.getElementById('justificativa').value;
+            if (justificativa.trim() !== '') {
+                window.location.href = `mailto:admin@empresa.com?subject=Solicitação de Acesso&body=Justificativa para o acesso: ${encodeURIComponent(justificativa)}`;
+            } else {
+                alert('Por favor, insira uma justificativa antes de enviar.');
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="icon">🚫</div>
+        <h1>Acesso Negado</h1>
+        <p data-bm="82">Você não tem permissão para acessar esta página. Se você acredita que isso é um erro, preencha uma justificativa abaixo e envie sua solicitação.</p>
+        <textarea id="justificativa" placeholder="Digite sua justificativa aqui..." data-bm="83"></textarea>
+        <button class="button" onclick="enviarJustificativa()" data-bm="84">Enviar Justificativa</button>
+        <a href="mailto:support@empresa.com?subject=Reporte de Erro&amp;body=Estou reportando um erro na página XYZ." class="button" style="background-color: #dc3545;" data-bm="85">
+            Reportar Erro
+        </a>
+    </div>
+
+
+</body></html>
