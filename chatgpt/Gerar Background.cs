@@ -204,3 +204,43 @@ namespace YourMvcApplication
 
 Esse código garante que o monitoramento é executado de forma assíncrona e não bloqueia a thread principal.
 */
+
+
+/* Uso no controller */
+
+using System.Web.Mvc;
+using YourNamespace;
+
+namespace YourMvcApplication.Controllers
+{
+    public class MonitorController : Controller
+    {
+        // Endpoint para iniciar o monitor
+        public ActionResult Start()
+        {
+            MvcApplication._databaseMonitor?.Start();
+            return Content("Monitor iniciado.");
+        }
+
+        // Endpoint para pausar o monitor
+        public ActionResult Pause()
+        {
+            MvcApplication._databaseMonitor?.Pause();
+            return Content("Monitor pausado.");
+        }
+
+        // Endpoint para retomar o monitor
+        public ActionResult Resume()
+        {
+            MvcApplication._databaseMonitor?.Resume();
+            return Content("Monitor retomado.");
+        }
+
+        // Endpoint para parar o monitor
+        public ActionResult Stop()
+        {
+            MvcApplication._databaseMonitor?.Stop();
+            return Content("Monitor parado.");
+        }
+    }
+}
