@@ -1,13 +1,13 @@
 
 
 
-> Written with [StackEdit](https://stackedit.io/).
-**Prompt**
+/*
+Prompt : 
 Preciso que me gere um codigo em uma classe em C# dedicada em uma Aplicação ASP NET MVC 4 que seja inicializada no Application_Start para que realize a seguinte ação : Executar em loop infinito em thread separada. Dentro desse loop, verifica a cada segundo o conteudo de uma tabela em um banco de dados SQL. De acordo com o resultado dessa tabela, tomar uma decição e executar uma Action ou um metodo qualquer. As caracteristicas da classe deve ser similar a um Worker Service ou um Background Job. A execução deve ser assyncrona e nao pode interferir a execução da trhead principal A liguagem deve ser C#
+*/
 
-**Resposta**
+//Criação da classe `DatabaseMonitor
 
-**Criação da classe `DatabaseMonitor`**:
 
 using System;
 using System.Data.SqlClient;
@@ -18,11 +18,23 @@ namespace YourNamespace
 {
     public class DatabaseMonitor
     {
-        private readonly CancellationTokenSource _cancellationTokenSource = new CancellationTokenSource();
+        private CancellationTokenSource _cancellationTokenSource;
+        private bool _isPaused;
+        private readonly object _lock = new object();
+
+        public DatabaseMonitor()
+        {
+            _cancellationTokenSource = new CancellationTokenSource();
+        }
 
         public void Start()
         {
-            Task.Run(async () => await MonitorDatabaseAsync(_cancellationTokenSource.Token));
+            if (_cancellationTokenSource.IsCancellationRequested || _isPaused)
+            {
+                _cancellationTokenSource = new CancellationTokenSource();
+                _isPaused = false;
+                Task.Run(async () => await MonitorDatabaseAsync(_cancellationTokenSource.Token));
+            }
         }
 
         private async Task MonitorDatabaseAsync(CancellationToken cancellationToken)
@@ -31,6 +43,14 @@ namespace YourNamespace
             {
                 try
                 {
+                    lock (_lock)
+                    {
+                        if (_isPaused)
+                        {
+                            Monitor.Wait(_lock);
+                        }
+                    }
+
                     using (var connection = new SqlConnection("your-connection-string"))
                     {
                         await connection.OpenAsync(cancellationToken);
@@ -39,28 +59,55 @@ namespace YourNamespace
                             var result = await command.ExecuteScalarAsync(cancellationToken);
                             if (result != null)
                             {
-                                // Verifica o resultado e toma uma decisão
                                 ProcessResult(result);
                             }
                         }
                     }
 
-                    // Aguardar 1 segundo antes de executar novamente
                     await Task.Delay(TimeSpan.FromSeconds(1), cancellationToken);
+                }
+                catch (OperationCanceledException)
+                {
+                    // O loop foi cancelado de forma controlada
+                    break;
                 }
                 catch (Exception ex)
                 {
-                    // Tratar exceções, logar se necessário
+                    // Tratar exceções e logar se necessário
                     Console.WriteLine($"Erro: {ex.Message}");
                 }
             }
+        }
+
+        public void Pause()
+        {
+            lock (_lock)
+            {
+                _isPaused = true;
+            }
+        }
+
+        public void Resume()
+        {
+            lock (_lock)
+            {
+                if (_isPaused)
+                {
+                    _isPaused = false;
+                    Monitor.Pulse(_lock);
+                }
+            }
+        }
+
+        public void Stop()
+        {
+            _cancellationTokenSource.Cancel();
         }
 
         private void ProcessResult(object result)
         {
             // Implementar a lógica de processamento do resultado
             Console.WriteLine($"Resultado: {result}");
-            // Chamar uma Action ou método aqui, por exemplo:
             ExecuteAction();
         }
 
@@ -69,14 +116,11 @@ namespace YourNamespace
             // Implementar a ação desejada
             Console.WriteLine("Ação executada!");
         }
-
-        public void Stop()
-        {
-            _cancellationTokenSource.Cancel();
-        }
     }
 }
 
+
+//Global.asax
 using System.Web.Mvc;
 using System.Web.Optimization;
 using System.Web.Routing;
@@ -86,7 +130,7 @@ namespace YourMvcApplication
 {
     public class MvcApplication : System.Web.HttpApplication
     {
-        private static DatabaseMonitor _databaseMonitor;
+        private DatabaseMonitor _databaseMonitor;
 
         protected void Application_Start()
         {
@@ -95,8 +139,9 @@ namespace YourMvcApplication
             RouteConfig.RegisterRoutes(RouteTable.Routes);
             BundleConfig.RegisterBundles(BundleTable.Bundles);
 
-            _databaseMonitor = new DatabaseMonitor();
-            _databaseMonitor.Start();
+            // Obtenha a instância de DatabaseMonitor a partir do contêiner de DI
+            _databaseMonitor = DependencyResolver.Current.GetService<DatabaseMonitor>();
+            _databaseMonitor?.Start();
         }
 
         protected void Application_End()
@@ -105,6 +150,8 @@ namespace YourMvcApplication
         }
     }
 }
+
+/*
 ### Explicação:
 
 -   **`DatabaseMonitor`**: Classe dedicada que realiza a tarefa de monitorar a base de dados em loop infinito em uma thread separada usando `Task.Run` para iniciar a execução de forma assíncrona.
@@ -113,3 +160,4 @@ namespace YourMvcApplication
 -   **Controle de interrupção**: O `CancellationToken` é usado para encerrar a execução de forma controlada.
 
 Esse código garante que o monitoramento é executado de forma assíncrona e não bloqueia a thread principal.
+*/
