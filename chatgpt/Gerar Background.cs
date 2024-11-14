@@ -120,6 +120,49 @@ namespace YourNamespace
 }
 
 
+//Esse codigo registra o DI do Ninject
+
+using Ninject;
+using Ninject.Web.Common;
+using System.Web.Mvc;
+using YourNamespace;
+
+[assembly: WebActivatorEx.PreApplicationStartMethod(typeof(YourMvcApplication.App_Start.NinjectWebCommon), "Start")]
+[assembly: WebActivatorEx.ApplicationShutdownMethodAttribute(typeof(YourMvcApplication.App_Start.NinjectWebCommon), "Stop")]
+
+namespace YourMvcApplication.App_Start
+{
+    public static class NinjectWebCommon
+    {
+        private static readonly Bootstrapper bootstrapper = new Bootstrapper();
+
+        public static void Start()
+        {
+            bootstrapper.Initialize(CreateKernel);
+        }
+
+        public static void Stop()
+        {
+            bootstrapper.ShutDown();
+        }
+
+        private static IKernel CreateKernel()
+        {
+            var kernel = new StandardKernel();
+            RegisterServices(kernel);
+            DependencyResolver.SetResolver(new NinjectDependencyResolver(kernel));
+            return kernel;
+        }
+
+        private static void RegisterServices(IKernel kernel)
+        {
+            kernel.Bind<DatabaseMonitor>().ToSelf().InSingletonScope();
+        }
+    }
+}
+
+
+
 //Global.asax
 using System.Web.Mvc;
 using System.Web.Optimization;
