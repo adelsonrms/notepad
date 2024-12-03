@@ -1,0 +1,57 @@
+using System;
+using Microsoft.Win32;
+
+class Program
+{
+    static void Main()
+    {
+        string windowsKey = GetWindowsKey();
+        Console.WriteLine("Chave do Windows: " + windowsKey);
+    }
+
+    public static string GetWindowsKey()
+    {
+        // Abrir o Registro para acessar a chave de produto
+        using (RegistryKey key = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\Windows NT\CurrentVersion"))
+        {
+            if (key == null)
+                return "Chave de registro não encontrada.";
+
+            object digitalProductId = key.GetValue("DigitalProductId");
+            if (digitalProductId == null)
+                return "Chave do produto não disponível.";
+
+            byte[] digitalProductIdBytes = (byte[])digitalProductId;
+
+            // Bytes que contêm a chave do Windows
+            byte[] keyBytes = new byte[15];
+            Array.Copy(digitalProductIdBytes, 52, keyBytes, 0, 15);
+
+            const string chars = "BCDFGHJKMPQRTVWXY2346789";
+            string decodedKey = string.Empty;
+
+            for (int i = 0; i < 25; i++)
+            {
+                int current = 0;
+
+                for (int j = 14; j >= 0; j--)
+                {
+                    current = (current * 256) ^ keyBytes[j];
+                    keyBytes[j] = (byte)(current / 24);
+                    current %= 24;
+                }
+
+                decodedKey = chars[current] + decodedKey;
+            }
+
+            // Adicionar os hífens a cada 5 caracteres
+            for (int i = 5; i < decodedKey.Length; i += 6)
+            {
+                decodedKey = decodedKey.Insert(i, "-");
+                i++;
+            }
+
+            return decodedKey;
+        }
+    }
+}
