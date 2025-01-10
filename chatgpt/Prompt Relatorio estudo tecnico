@@ -1,0 +1,13 @@
+## Prompt : 
+
+> Crie ou me disponibilize um link de modelo de diagrama Draw.io que ilustre as seguintes partes :Descreva o processo em tres etapas : 
+> 1. Carga de dados : 
+> a. Tela de upload de uma base Excel com os lançamentos de provisoes por tributo 
+> b. Transfere a base importada (via upload) e armazena em uma tabela "Empresa_Registros" 
+> 2. Analise de Estudo Tecnico 
+> a. Em uma pagina da web (formulario de input) seleciona os inputs e clica em "Gerar Relatorio" 
+> b. Os dados são enviados para o servidor e processados por uma Store Procedure "sp_Exec_Relatorio" no SQL Server 
+> c. O retorno da Proc é devolvido para a aplicação ASPNET para o DataTable. 
+> d. o DataTable com os dados processados são enviados para uma pagina "ReporViewer"
+>  e. Por fim, a pagina do relatorio é apresentada ao usuario. 
+> Gerar diagramas de caso de uso, sequencia para esse fluxo. Incluir icones ou figuras para ilustrar
