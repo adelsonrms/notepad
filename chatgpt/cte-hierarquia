@@ -1,0 +1,149 @@
+
+-- Criar a tabela temporária para armazenar os dados de hierarquia
+CREATE TABLE #Hierarquia (
+    Filho INT PRIMARY KEY,
+    Pai INT NULL
+);
+
+-- Inserir dados de exemplo
+INSERT INTO #Hierarquia (Filho, Pai)
+VALUES
+    (10, NULL),
+    (12, 10),
+    (13, 10),
+    (131, 13),
+    (132, 13),
+    (1321, 132),
+    (1322, 132),
+    (20, NULL),
+    (21, 20),
+    (22, 20),
+    (221, 22);
+
+-- CTE recursiva para obter os níveis da hierarquia
+WITH CTE_Hierarquia AS (
+    -- Caso base: os nós raiz
+    SELECT 
+        Filho, 
+        Pai, 
+        CAST(Filho AS VARCHAR(MAX)) AS Caminho,
+        1 AS Nivel,
+        CAST(Filho AS VARCHAR(MAX)) AS Nivel1,
+        NULL AS Nivel2,
+        NULL AS Nivel3,
+        NULL AS Nivel4
+    FROM #Hierarquia
+    WHERE Pai IS NULL
+    
+    UNION ALL
+    
+    -- Caso recursivo: nós filhos
+    SELECT 
+        h.Filho, 
+        h.Pai, 
+        CAST(ch.Caminho + ' -> ' + CAST(h.Filho AS VARCHAR(MAX)) AS VARCHAR(MAX)) AS Caminho,
+        ch.Nivel + 1 AS Nivel,
+        ch.Nivel1,
+        CASE WHEN ch.Nivel = 1 THEN h.Filho ELSE ch.Nivel2 END,
+        CASE WHEN ch.Nivel = 2 THEN h.Filho ELSE ch.Nivel3 END,
+        CASE WHEN ch.Nivel = 3 THEN h.Filho ELSE ch.Nivel4 END
+    FROM #Hierarquia h
+    INNER JOIN CTE_Hierarquia ch ON h.Pai = ch.Filho
+)
+SELECT 
+    Filho,
+    Nivel1,
+    Nivel2,
+    Nivel3,
+    Nivel4,
+    Caminho
+INTO #Resultado
+FROM CTE_Hierarquia
+ORDER BY Filho;
+
+-- Exibir os resultados
+SELECT * FROM #Resultado;
+
+-- Limpar tabelas temporárias
+DROP TABLE #Hierarquia;
+DROP TABLE #Resultado;
+
+
+-- nivel dinamico
+-- Criar a tabela temporária para armazenar os dados de hierarquia
+CREATE TABLE #Hierarquia (
+    Filho INT PRIMARY KEY,
+    Pai INT NULL
+);
+
+-- Inserir dados de exemplo
+INSERT INTO #Hierarquia (Filho, Pai)
+VALUES
+    (10, NULL),
+    (12, 10),
+    (13, 10),
+    (131, 13),
+    (132, 13),
+    (1321, 132),
+    (1322, 132),
+    (20, NULL),
+    (21, 20),
+    (22, 20),
+    (221, 22);
+
+-- Determinar o número máximo de níveis
+DECLARE @MaxNivel INT;
+SELECT @MaxNivel = MAX(Nivel) FROM (
+    WITH CTE_Niveis AS (
+        SELECT Filho, 1 AS Nivel FROM #Hierarquia WHERE Pai IS NULL
+        UNION ALL
+        SELECT h.Filho, c.Nivel + 1 FROM #Hierarquia h
+        INNER JOIN CTE_Niveis c ON h.Pai = c.Filho
+    )
+    SELECT * FROM CTE_Niveis
+) AS Subquery;
+
+-- CTE recursiva para obter os níveis da hierarquia
+WITH CTE_Hierarquia AS (
+    -- Caso base: os nós raiz
+    SELECT 
+        Filho, 
+        Pai, 
+        CAST(Filho AS VARCHAR(MAX)) AS Caminho,
+        1 AS Nivel,
+        CAST(Filho AS VARCHAR(MAX)) AS NivelPath
+    FROM #Hierarquia
+    WHERE Pai IS NULL
+    
+    UNION ALL
+    
+    -- Caso recursivo: nós filhos
+    SELECT 
+        h.Filho, 
+        h.Pai, 
+        CAST(ch.Caminho + ' -> ' + CAST(h.Filho AS VARCHAR(MAX)) AS VARCHAR(MAX)) AS Caminho,
+        ch.Nivel + 1 AS Nivel,
+        CAST(ch.NivelPath + ';' + CAST(h.Filho AS VARCHAR(MAX)) AS VARCHAR(MAX)) AS NivelPath
+    FROM #Hierarquia h
+    INNER JOIN CTE_Hierarquia ch ON h.Pai = ch.Filho
+)
+SELECT 
+    Filho,
+    Caminho,
+    STRING_AGG(NivelValue, ';') WITHIN GROUP (ORDER BY Nivel) AS Niveis
+INTO #Resultado
+FROM (
+    SELECT Filho, Nivel, PARSENAME(REPLACE(NivelPath, ';', '.'), Numero) AS NivelValue
+    FROM CTE_Hierarquia
+    CROSS APPLY (SELECT TOP (@MaxNivel) ROW_NUMBER() OVER (ORDER BY (SELECT NULL)) AS Numero FROM master.dbo.spt_values) AS NiveisDinamicos
+) AS Src
+GROUP BY Filho, Caminho
+ORDER BY Filho;
+
+-- Exibir os resultados
+SELECT * FROM #Resultado;
+
+-- Limpar tabelas temporárias
+DROP TABLE #Hierarquia;
+DROP TABLE #Resultado;
+
