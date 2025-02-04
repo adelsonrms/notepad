@@ -1,0 +1,90 @@
+me explique a execução desses comandos. O que acontece em cada etapa 
+
+wget https://dotnet.microsoft.com/download/dotnet/scripts/v1/dotnet-install.sh; 
+chmod +x dotnet-install.sh; 
+./dotnet-install.sh -version 8.0.303; 
+$ENV:PATH="$HOME/.dotnet:$ENV:PATH"; 
+dotnet tool install --global dotnet-ef --version 8.0.0; 
+git clone https://github.com/Azure/Commercial-Marketplace-SaaS-Accelerator.git -b 8.0.0 --depth 1; 
+cd ./Commercial-Marketplace-SaaS-Accelerator/deployment; 
+.\Deploy.ps1 
+ -WebAppNamePrefix "SOME-UNIQUE-STRING" 
+ -ResourceGroupForDeployment "SOME-RG-NAME" 
+ -PublisherAdminUsers "user1@email.com,user2@email" 
+ -Location "East US" 
+O ChatGPT disse:
+ChatGPT
+Vamos analisar cada etapa do seu comando e entender o que acontece em cada uma delas.
+
+1️⃣ Baixando o script de instalação do .NET
+sh
+Copiar
+Editar
+wget https://dotnet.microsoft.com/download/dotnet/scripts/v1/dotnet-install.sh;
+wget: Baixa um arquivo da internet.
+O script dotnet-install.sh é baixado diretamente do site da Microsoft.
+2️⃣ Dando permissão de execução ao script
+sh
+Copiar
+Editar
+chmod +x dotnet-install.sh;
+chmod +x: Torna o script executável.
+Agora podemos rodar o script diretamente no terminal.
+3️⃣ Executando o script para instalar o .NET SDK
+sh
+Copiar
+Editar
+./dotnet-install.sh -version 8.0.303;
+O script instala a versão 8.0.303 do .NET SDK.
+Ele baixa os arquivos e os instala no diretório padrão ($HOME/.dotnet).
+4️⃣ Configurando a variável de ambiente $PATH
+sh
+Copiar
+Editar
+$ENV:PATH="$HOME/.dotnet:$ENV:PATH";
+Adiciona $HOME/.dotnet ao $PATH, garantindo que os comandos dotnet sejam reconhecidos no terminal.
+Esse comando é específico para PowerShell (caso esteja rodando no Linux, o equivalente seria export PATH="$HOME/.dotnet:$PATH").
+5️⃣ Instalando a ferramenta dotnet-ef
+sh
+Copiar
+Editar
+dotnet tool install --global dotnet-ef --version 8.0.0;
+Instala o dotnet-ef (Entity Framework CLI), usado para gerenciar bancos de dados via migrations.
+O flag --global faz com que a ferramenta fique disponível globalmente.
+6️⃣ Clonando o repositório do Azure SaaS Accelerator
+sh
+Copiar
+Editar
+git clone https://github.com/Azure/Commercial-Marketplace-SaaS-Accelerator.git -b 8.0.0 --depth 1;
+git clone baixa um repositório do GitHub.
+-b 8.0.0 indica que queremos a versão específica 8.0.0 do código.
+--depth 1 baixa apenas o commit mais recente dessa versão para economizar espaço.
+7️⃣ Entrando na pasta de deployment
+sh
+Copiar
+Editar
+cd ./Commercial-Marketplace-SaaS-Accelerator/deployment;
+cd muda para o diretório onde estão os arquivos necessários para a implantação no Azure.
+8️⃣ Executando o script de deploy no Azure
+sh
+Copiar
+Editar
+.\Deploy.ps1 `
+ -WebAppNamePrefix "SOME-UNIQUE-STRING" `
+ -ResourceGroupForDeployment "SOME-RG-NAME" `
+ -PublisherAdminUsers "user1@email.com,user2@email" `
+ -Location "East US"
+Executa o script Deploy.ps1 (um script PowerShell).
+Parâmetros passados:
+-WebAppNamePrefix: Prefixo para o nome dos recursos no Azure.
+-ResourceGroupForDeployment: Nome do grupo de recursos onde os serviços serão criados.
+-PublisherAdminUsers: Lista de e-mails dos administradores do SaaS.
+-Location: Região do Azure onde os recursos serão implantados (ex: East US).
+Resumo do que esse script faz
+Baixa e instala o .NET SDK 8.0.303.
+Configura o ambiente para usar o .NET.
+Instala o dotnet-ef globalmente.
+Clona o repositório Commercial Marketplace SaaS Accelerator do Azure.
+Entra na pasta de deployment.
+Executa um script PowerShell para implantar a solução no Azure.
+Se precisar de mais detalhes ou explicação sobre algum ponto, só avisar! 🚀
