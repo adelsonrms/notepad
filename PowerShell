@@ -10,3 +10,10 @@ Suporta todos os comandos do CMD (DOS) ou Prompt de Comando.
 # Algums comandos .
 
 wget : Realiza uma requisição web utilizado o metodo GET. 
+
+```powershell
+# Baixa o conteudo retornado pela url.
+
+wget www.google.com.br
+
+```
