@@ -7,7 +7,7 @@
 Suporta todos os comandos do CMD (DOS) ou Prompt de Comando.
 
 
-# Algums comandos .
+# Alguns comandos .
 
 wget : Realiza uma requisição web utilizado o metodo GET. 
 
