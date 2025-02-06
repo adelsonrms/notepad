@@ -9,7 +9,7 @@ Suporta todos os comandos do CMD (DOS) ou Prompt de Comando.
 
 # Alguns comandos .
 
-wget : Realiza uma requisição web utilizado o metodo GET. 
+``wget`` : Realiza uma requisição web utilizado o metodo GET. 
 
 Obs. Esse comando internamente utiliza o ``cmdlet Invoke-WebRequest``
 
