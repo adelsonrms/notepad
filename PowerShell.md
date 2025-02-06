@@ -11,6 +11,7 @@ Suporta todos os comandos do CMD (DOS) ou Prompt de Comando.
 
 wget : Realiza uma requisição web utilizado o metodo GET. 
 
+Obs. Esse comando internamente utiliza o '''cmdlet Invoke-WebRequest'''
 ```powershell
 # Baixa o conteudo retornado pela url.
 
