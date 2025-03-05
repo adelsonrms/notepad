@@ -1,0 +1,91 @@
+Prompt :
+
+Prompt para Execução em Outros Provedores de IA
+1. Contexto
+Estou trabalhando com uma estrutura hierárquica armazenada em uma tabela SQL, onde cada item pode ter um pai e alguns itens possuem um valor que precisa ser calculado com base na soma dos valores de seus filhos.
+
+2. Estrutura da Tabela de Exemplo
+A tabela segue o seguinte formato:
+
+sql
+Copiar
+Editar
+CREATE TABLE Hierarquia (
+    Item INT PRIMARY KEY,
+    Parent INT NULL,
+    Valor DECIMAL(18,2)
+);
+Os dados podem ser representados da seguinte forma:
+
+Item	Parent	Valor	Observação
+0	NULL	NULL	Deve ser a soma de todos os filhos
+10	0	NULL	Deve ser a soma dos filhos 12 e 13
+12	10	10.00	Valor já conhecido
+13	10	NULL	Deve ser a soma dos filhos 131 e 132
+131	13	NULL	Deve ser a soma dos filhos, se houver
+132	13	NULL	Deve ser a soma dos filhos, se houver
+20	0	NULL	Deve ser a soma dos filhos 21 e 22
+21	20	50.00	Valor já conhecido
+22	20	50.00	Valor já conhecido
+3. Objetivo
+Preciso de um script T-SQL que:
+✅ Utilize CTE recursiva para percorrer a hierarquia e calcular os valores onde necessário.
+✅ Some os valores dos filhos e preencha corretamente os pais onde o valor está NULL.
+✅ Garanta que os cálculos sejam feitos corretamente, independente da profundidade da hierarquia.
+✅ Apresente os resultados organizados em uma tabela final.
+
+
+Resposta : 
+
+-- Criar tabela temporária para armazenar os dados hierárquicos
+CREATE TABLE #Hierarquia (
+    Item INT PRIMARY KEY,
+    Parent INT NULL,
+    Valor DECIMAL(18,2)
+);
+
+-- Inserir dados de exemplo
+INSERT INTO #Hierarquia (Item, Parent, Valor)
+VALUES
+    (0, NULL, NULL),  -- Deve ser a soma dos filhos
+    (10, 0, NULL),    -- Deve ser a soma dos filhos
+    (12, 10, 10.00),
+    (13, 10, 20.00),  -- Deve ser a soma dos filhos
+    (131, 13, NULL),
+    (132, 13, NULL),
+    (20, 0, NULL),    -- Deve ser a soma dos filhos
+    (21, 20, 50.00),
+    (22, 20, 50.00);
+
+-- CTE Recursiva para calcular a soma dos valores
+WITH CTE_Valores AS (
+    -- Seleciona os nós folha (onde o valor já é conhecido)
+    SELECT 
+        Item, 
+        Parent, 
+        ISNULL(Valor, 0) AS ValorCalculado
+    FROM #Hierarquia
+
+    UNION ALL
+
+    -- Soma os valores dos filhos para calcular o valor dos pais
+    SELECT 
+        h.Item, 
+        h.Parent, 
+        ISNULL(h.Valor, 0) + ISNULL(SUM(c.ValorCalculado), 0)
+    FROM #Hierarquia h
+    INNER JOIN CTE_Valores c ON h.Item = c.Parent
+    GROUP BY h.Item, h.Parent, h.Valor
+)
+
+-- Atualizar a tabela com os valores calculados
+UPDATE h
+SET h.Valor = c.ValorCalculado
+FROM #Hierarquia h
+JOIN CTE_Valores c ON h.Item = c.Item;
+
+-- Exibir os resultados
+SELECT * FROM #Hierarquia ORDER BY Item;
+
+-- Limpar tabela temporária
+DROP TABLE #Hierarquia;
