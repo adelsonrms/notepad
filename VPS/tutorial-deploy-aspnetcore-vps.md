@@ -1,3 +1,18 @@
+# Implantação de Aplicação ASP.NET Core em VPS Linux
+
+## Informações da VPS
+
+- **Servidor VPS**: Hostinger  
+- **Painel**: [https://hpanel.hostinger.com/vps/793007/overview](https://hpanel.hostinger.com/vps/793007/overview)  
+- **Sistema Operacional**: Ubuntu 24.04  
+- **Hostname**: srv793007.hstgr.cloud  
+- **Acesso Terminal**: `ssh root@147.93.69.236`  
+- **Usuário**: root  
+- **Senha root**: ...  
+- **Acesso via Área de Trabalho Remota (MSTSC)**: usar mesmo usuário e senha  
+
+---
+
 # Implantação de Aplicação ASP.NET Core em VPS Linux Ubuntu
 
 **Data**: 16/04/2025  
@@ -158,3 +173,35 @@ http://n8n.armscorp.com.br
 - [ ] Instalar HTTPS com Let's Encrypt + Certbot
 - [ ] Automatizar deploy com Git ou GitHub Actions
 - [ ] Configurar backup e monitoramento
+
+---
+
+## Habilitando HTTPS com Let's Encrypt (Certbot)
+
+1. **Instale o Certbot**:
+   ```bash
+   sudo apt update
+   sudo apt install certbot python3-certbot-nginx
+   ```
+
+2. **Verifique se o seu domínio está corretamente configurado para o IP da VPS** (registro A no DNS).
+
+3. **Execute o Certbot para configurar o SSL automaticamente com Nginx**:
+   ```bash
+   sudo certbot --nginx -d worc.armscorp.com.br
+   ```
+
+4. **Siga os prompts para obter e aplicar o certificado SSL.**
+
+5. **Verifique se o redirecionamento HTTP → HTTPS está funcionando**:
+   ```bash
+   sudo systemctl status nginx
+   ```
+
+6. **Renovação automática (já configurada por padrão)**:
+   - Você pode testar com:
+     ```bash
+     sudo certbot renew --dry-run
+     ```
+
+Pronto! Sua aplicação agora está rodando com HTTPS ativo.

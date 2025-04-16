@@ -1,0 +1,40 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "id",
+          "value": "grok-2-latest"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        220,
+        240
+      ],
+      "id": "ed0bde66-46f2-48c5-8f5f-fa4093581e31",
+      "name": "xAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "vLztvkBAzpJO5yMs",
+          "name": "xAI"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "xAI Chat Model1": {
+      "ai_languageModel": [
+        []
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "4716021bd420e1af868575cb5eed2477d42420dbeb2cb15c6699f9074cabfce0"
+  }
+}
