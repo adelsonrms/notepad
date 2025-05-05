@@ -1,6 +1,15 @@
-namespace WinFormsApp1
+namespace CashPosition
 {
-    partial class Form1
+
+    public partial class MainPage : Form
+    {
+        public MainPage()
+        {
+            InitializeComponent();
+        }
+    }
+    
+    partial class MainPage
     {
         private System.ComponentModel.IContainer components = null;
 
