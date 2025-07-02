@@ -1,0 +1,85 @@
+DBCC SQLPERF(LOGSPACE);
+
+Como investigar?
+Verificar espaço do log:
+
+sql
+Copiar
+DBCC SQLPERF(LOGSPACE);
+Ele mostra quanto do log está usado.
+
+Verificar transações ativas e bloqueios:
+
+sql
+Copiar
+-- Lista transações abertas
+DBCC OPENTRAN('DB_CONSOLIDADO');
+
+-- Ver bloqueios ativos
+EXEC sp_who2; 
+-- Ou
+SELECT * FROM sys.dm_tran_locks WHERE resource_database_id = DB_ID('DB_CONSOLIDADO');
+Ver o tamanho e autogrowth do log:
+
+sql
+Copiar
+SELECT name, size, max_size, growth FROM sys.database_files WHERE type_desc = 'LOG';
+Checar se o banco está no modo FULL e se tem backup do log recente:
+
+sql
+Copiar
+SELECT name, recovery_model_desc FROM sys.databases WHERE name = 'DB_CONSOLIDADO';
+Se estiver em FULL, o log precisa ser feito backup regularmente, ou o log vai crescer até encher o disco.
+
+Checar uso do disco:
+
+Confirme se o drive do log não está cheio no servidor.
+
+O que fazer pra resolver rápido?
+Fazer backup do log (se recovery mode FULL):
+
+sql
+Copiar
+BACKUP LOG DB_CONSOLIDADO TO DISK = 'caminho\backup_log.trn';
+Isso libera espaço para truncar o log.
+
+Se for possível, rodar um checkpoint manual:
+
+sql
+Copiar
+CHECKPOINT;
+Se o log está pequeno e precisa crescer, liberar espaço no disco ou aumentar o tamanho/autogrowth do arquivo de log.
+
+Se estiver em modo SIMPLE e log cheio (menos comum), pode ser que o checkpoint não tenha rodado ou transação aberta muito tempo.
+
+Verificar e finalizar transações longas ou processos bloqueados.
+
+Se possível, dividir o DELETE em batches menores (ex: apagar 10 mil registros por vez) pra não gerar muito log.
+
+Como evitar esse problema?
+Fazer backup do log regularmente se estiver em FULL recovery mode.
+
+Monitorar o tamanho e crescimento do log.
+
+Evitar transações muito longas.
+
+Usar DELETE/UPDATE em batches menores.
+
+Monitorar bloqueios e transações abertas.
+
+Configurar autogrowth adequado e espaço em disco suficiente.
+
+
+
+WHILE 1=1
+BEGIN
+    DELETE TOP (10000) FROM [DB_CONSOLIDADO].[dbo].T_PCONP_BASE_CONSL_ANLTCA
+    WHERE N_NRO_ANOMES_FIS = 202502 
+      AND N_COD_ORIGE IN (110, 114, 115, 116, 117, 118, 119, 150, 130, 131, 139, 140)
+      AND C_COD_GRP_CONSL = 'CPC';
+
+    IF @@ROWCOUNT = 0 BREAK;
+
+    -- Dá um checkpoint entre os batches (opcional)
+    CHECKPOINT;
+END
